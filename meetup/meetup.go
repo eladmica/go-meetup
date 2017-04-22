@@ -19,7 +19,8 @@ type Client struct {
 	// HTTP client used to communicate with the API.
 	client *http.Client
 
-	// TODO: Add authentication
+	// Authentication can be used to authenticate requests
+	Authentication Authenticator
 
 	// TODO: Add rate limit
 }
@@ -30,7 +31,8 @@ func NewClient(httpClient *http.Client) *Client {
 		httpClient = http.DefaultClient
 	}
 	return &Client{
-		client: httpClient,
+		client:         httpClient,
+		Authentication: nil,
 	}
 }
 
@@ -40,6 +42,13 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	req, err := http.NewRequest(method, urlStr, nil)
 	if err != nil {
 		return req, err
+	}
+
+	if c.Authentication != nil {
+		err := c.Authentication.AuthenticateRequest(req)
+		if err != nil {
+			return req, err
+		}
 	}
 
 	return req, nil
