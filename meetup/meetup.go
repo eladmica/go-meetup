@@ -1,17 +1,23 @@
 package meetup
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
+	"sync"
 )
 
 const (
-	baseURL = "https://api.meetup.com"
+	baseURL             = "https://api.meetup.com"
+	headerRateLimit     = "X-RateLimit-Limit"
+	headerRateRemaining = "X-Ratelimit-Remaining"
+	headerRateReset     = "X-RateLimit-Reset"
 )
 
 // Client is used to communicate with the Meetup API
@@ -22,7 +28,10 @@ type Client struct {
 	// Authentication can be used to authenticate requests
 	Authentication Authenticator
 
-	// TODO: Add rate limit
+	// Rate limits for the client
+	RateLimits *Rate
+
+	sync.Mutex
 }
 
 // NewClient returns a new Meetup API client
@@ -33,15 +42,27 @@ func NewClient(httpClient *http.Client) *Client {
 	return &Client{
 		client:         httpClient,
 		Authentication: nil,
+		RateLimits:     nil,
 	}
 }
 
 // Create an API request
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-	// TODO: request body
-	req, err := http.NewRequest(method, urlStr, nil)
+	var buf bytes.Buffer
+	if body != nil {
+		err := json.NewEncoder(buf).Encode(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, urlStr, buf)
 	if err != nil {
 		return req, err
+	}
+
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	if c.Authentication != nil {
@@ -63,6 +84,10 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 
 	defer resp.Body.Close()
 
+	c.Lock()
+	c.RateLimits = parseRate(resp.Header)
+	c.Unlock()
+
 	err = checkResponse(resp)
 	if err != nil {
 		return err
@@ -74,6 +99,37 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 	}
 
 	return nil
+}
+
+// Rate limits by the Meetup API
+type Rate struct {
+	// Maximum number of requests that can be made in a window of time
+	Limit int
+
+	// Remaining number of requests allowed in the current rate limit window
+	Remaining int
+
+	// Number of seconds until the current rate limit window resets
+	Reset int
+}
+
+// parse rate limits from the Meetup API response header
+func parseRate(header http.Header) *Rate {
+	var rate Rate
+
+	if limit := header.Get(headerRateLimit); limit != "" {
+		rate.Limit, _ = strconv.Atoi(limit)
+	}
+
+	if remaining := header.Get(headerRateRemaining); remaining != "" {
+		rate.Remaining, _ = strconv.Atoi(remaining)
+	}
+
+	if reset := header.Get(headerRateReset); reset != "" {
+		rate.Reset, _ = strconv.Atoi(reset)
+	}
+
+	return &rate
 }
 
 // Error reports a general error from the API
@@ -113,9 +169,9 @@ func checkResponse(r *http.Response) error {
 	return errorResponse
 }
 
-// Encodes params struct as URL query parameters and returns the resulting url.
+// params must be a struct / pointer to a struct with possible types: pointers, ints, uints, floats, bool, string
+// Encodes params as URL query parameters and returns the resulting url.
 // params fields should contain "url" tags, or else would be ignored.
-// TODO: Support maps / slices / interfaces, params as map?
 func addQueryParams(rawURL string, params interface{}) (string, error) {
 	if params == nil {
 		return rawURL, nil
