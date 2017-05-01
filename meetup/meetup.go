@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,16 +15,23 @@ import (
 )
 
 const (
-	baseURL             = "https://api.meetup.com"
+	baseURL = "https://api.meetup.com"
+
 	headerRateLimit     = "X-RateLimit-Limit"
 	headerRateRemaining = "X-Ratelimit-Remaining"
 	headerRateReset     = "X-RateLimit-Reset"
+	headerContentType   = "Content-Type"
+
+	mediaType = "application/json"
 )
 
 // Client is used to communicate with the Meetup API
 type Client struct {
 	// HTTP client used to communicate with the API.
 	client *http.Client
+
+	// Base URL for the meetup api. Have it as a field to allow mock testing
+	BaseURL string
 
 	// Authentication can be used to authenticate requests
 	Authentication Authenticator
@@ -41,6 +49,7 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 	return &Client{
 		client:         httpClient,
+		BaseURL:        baseURL,
 		Authentication: nil,
 		RateLimits:     nil,
 	}
@@ -48,8 +57,9 @@ func NewClient(httpClient *http.Client) *Client {
 
 // Create an API request
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-	var buf bytes.Buffer
+	var buf io.ReadWriter
 	if body != nil {
+		buf = new(bytes.Buffer)
 		err := json.NewEncoder(buf).Encode(body)
 		if err != nil {
 			return nil, err
@@ -62,7 +72,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	}
 
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set(headerContentType, mediaType)
 	}
 
 	if c.Authentication != nil {
@@ -241,6 +251,5 @@ func isEmpty(val reflect.Value) bool {
 	case reflect.Array, reflect.Map, reflect.Slice:
 		return val.Len() == 0
 	}
-
 	return false
 }
