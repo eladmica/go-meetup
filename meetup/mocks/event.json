@@ -1,0 +1,46 @@
+{
+  "created": 1476304026000,
+  "fee": {
+    "accepts": "wepay",
+    "amount": 10,
+    "currency": "USD",
+    "description": "per person",
+    "label": "price",
+    "required": true
+  },
+  "id": "234811452",
+  "name": "May 2017 NY Tech Meetup and Afterparty",
+  "rsvp_limit": 400,
+  "status": "upcoming",
+  "time": 1494370800000,
+  "updated": 1492530555000,
+  "utc_offset": -14400000,
+  "waitlist_count": 0,
+  "yes_rsvp_count": 120,
+  "venue": {
+    "id": 17858792,
+    "name": "NYU Skirball center ",
+    "lat": 40.729461669921875,
+    "lon": -73.99783325195312,
+    "repinned": false,
+    "address_1": "566 LaGuardia Place at Washington Square",
+    "city": "New York",
+    "country": "us",
+    "localized_country_name": "USA",
+    "zip": "",
+    "state": "NY"
+  },
+  "group": {
+    "created": 1096140622000,
+    "name": "NY Tech Meetup",
+    "id": 176399,
+    "join_mode": "open",
+    "lat": 40.720001220703125,
+    "lon": -74,
+    "urlname": "ny-tech",
+    "who": "NYC Technologists"
+  },
+  "link": "https://www.meetup.com/ny-tech/events/234811452/",
+  "description": "Join us for NYC's most famous and longest running monthly tech event!",
+  "visibility": "public"
+}
