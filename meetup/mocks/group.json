@@ -1,0 +1,53 @@
+{
+  "id": 176399,
+  "name": "NY Tech Meetup",
+  "link": "https://www.meetup.com/ny-tech/",
+  "urlname": "ny-tech",
+  "description": "<p><strong>Interested in learning more about all of our membership levels or looking for more detailed information on NYTM?</strong><span> Head over to our full website at </span><a href...",
+  "created": 1096140622000,
+  "city": "New York",
+  "country": "US",
+  "localized_country_name": "USA",
+  "state": "NY",
+  "join_mode": "open",
+  "visibility": "public",
+  "lat": 40.72,
+  "lon": -74,
+  "members": 53947,
+  "organizer": {
+    "id": 164510652,
+    "name": "NY Tech Meetup",
+    "bio": "NY Tech Meetup is the world's largest Meetup group. We host a monthly gathering to showcase great technology being developed in New York. The Meetup group is operated by NY Tech Alliance, a non-profit organization."
+  },
+  "who": "NYC Technologists",
+  "group_photo": {
+    "id": 450817043,
+    "highres_link": "https://secure.meetupstatic.com/photos/event/9/0/b/3/highres_450817043.jpeg",
+    "photo_link": "https://secure.meetupstatic.com/photos/event/9/0/b/3/600_450817043.jpeg",
+    "thumb_link": "https://secure.meetupstatic.com/photos/event/9/0/b/3/thumb_450817043.jpeg",
+    "type": "event",
+    "base_url": "https://secure.meetupstatic.com"
+  },
+  "key_photo": {
+    "id": 449694535,
+    "highres_link": "https://secure.meetupstatic.com/photos/event/d/5/0/7/highres_449694535.jpeg",
+    "photo_link": "https://secure.meetupstatic.com/photos/event/d/5/0/7/600_449694535.jpeg",
+    "thumb_link": "https://secure.meetupstatic.com/photos/event/d/5/0/7/thumb_449694535.jpeg",
+    "type": "event",
+    "base_url": "https://secure.meetupstatic.com"
+  },
+  "timezone": "US/Eastern",
+  "next_event": {
+    "id": "234811452",
+    "name": "May 2017 NY Tech Meetup and Afterparty - Creative Tech Theme",
+    "yes_rsvp_count": 120,
+    "time": 1494370800000,
+    "utc_offset": -14400000
+  },
+  "category": {
+    "id": 34,
+    "name": "Tech",
+    "shortname": "Tech",
+    "sort_name": "Tech"
+  }
+}
