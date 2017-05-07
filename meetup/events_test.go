@@ -86,20 +86,18 @@ func TestGetEvents(t *testing.T) {
 	defer teardown()
 
 	testEndpoint := "/:urlname/events"
-	testParams := "desc=true&page=5"
-
-	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, fmt.Sprintf("%v?%v", testEndpoint, testParams))
-		fmt.Fprint(rw, "[]")
-	})
-
-	params := &GetEventsParams{
+	testParams := &GetEventsParams{
 		Desc: true,
 		Page: 5,
 	}
 
-	_, err := testClient.GetEvents(":urlname", params)
+	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
+		testReqMethod(t, req, "GET")
+		testReqURL(t, req, fmt.Sprintf("%v?desc=%v&page=%v", testEndpoint, testParams.Desc, testParams.Page))
+		fmt.Fprint(rw, "[]")
+	})
+
+	_, err := testClient.GetEvents(":urlname", testParams)
 	if err != nil {
 		t.Errorf("unexpected error in GetEvents: %v", err)
 	}

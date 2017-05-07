@@ -1,0 +1,20 @@
+[
+  {
+    "id": 90286,
+    "name": "Social Coding",
+    "urlkey": "social-coding",
+    "group_count": 294,
+    "member_count": 110349,
+    "description": "Find out what's happening in Social Coding Meetup groups around the world and start meeting up with the ones near you.",
+    "lang": "en_US"
+  },
+  {
+    "id": 44602,
+    "name": "Coding Dojos",
+    "urlkey": "coding-dojos",
+    "group_count": 134,
+    "member_count": 42762,
+    "description": "Find out what's happening in Coding Dojos Meetup groups around the world and start meeting up with the ones near you.",
+    "lang": "en_US"
+  }
+]

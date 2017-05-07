@@ -1,9 +1,6 @@
 package meetup
 
-import (
-	"fmt"
-	"net/http"
-)
+import "fmt"
 
 type Event struct {
 	Created       int         `json:"created"`
@@ -94,7 +91,7 @@ func (c *Client) GetEvents(urlName string, params *GetEventsParams) ([]*Event, e
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
