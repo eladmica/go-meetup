@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"strconv"
 	"testing"
@@ -25,6 +26,7 @@ var (
 	testServer *httptest.Server
 )
 
+// setup sets the test server and Meetup client.
 func setup() {
 	testMux = http.NewServeMux()
 	testServer = httptest.NewServer(testMux)
@@ -37,6 +39,7 @@ func teardown() {
 	testServer.Close()
 }
 
+// getMockResponse reads mock Meetup API responses from a file.
 func getMockResponse(file string) ([]byte, error) {
 	fileName := fmt.Sprintf("%v/%v", mocksLocation, file)
 
@@ -48,15 +51,19 @@ func getMockResponse(file string) ([]byte, error) {
 	return res, nil
 }
 
-func testReqMethod(t *testing.T, req *http.Request, expected string) {
+func testRequestMethod(t *testing.T, req *http.Request, expected string) {
 	if actual := req.Method; actual != expected {
-		t.Errorf("Method expected: %v, actual %v", expected, actual)
+		t.Errorf("expected method: %v, actual %v", expected, actual)
 	}
 }
 
-func testReqURL(t *testing.T, req *http.Request, expected string) {
-	if actual := req.URL.String(); actual != expected {
-		t.Errorf("URL expected: %v, actual: %v", expected, actual)
+func testRequestURL(t *testing.T, req *http.Request, expected string) {
+	expectedURL, err := url.Parse(expected)
+	if err != nil {
+		t.Errorf("unexpected error: badly formatted expected URL: %v", err)
+	}
+	if actual := req.URL; !reflect.DeepEqual(actual, expectedURL) {
+		t.Errorf("expected URL: %+v, actual: %+v", expected, actual)
 	}
 }
 
@@ -73,7 +80,6 @@ func TestParseRate(t *testing.T) {
 	header.Set(headerRateReset, strconv.Itoa(expected.Reset))
 
 	actual := parseRate(header)
-
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("parseRate(%v): expected: %v, actual %v",
 			header, expected, actual)
@@ -98,25 +104,33 @@ func TestAddQueryParams(t *testing.T) {
 		{
 			params: struct {
 				Text string
-			}{"dummy"},
+			}{
+				"dummy",
+			},
 			expected: rawURL,
 		},
 		{
 			params: &struct {
 				Text string `url:"text,omitempty"`
-			}{""},
+			}{
+				"",
+			},
 			expected: rawURL,
 		},
 		{
 			params: &struct {
 				Text *string `url:"text"`
-			}{nil},
+			}{
+				nil,
+			},
 			expected: rawURL,
 		},
 		{
 			params: &struct {
 				Text string `url:"text"`
-			}{"dummy"},
+			}{
+				"dummy",
+			},
 			expected: fmt.Sprintf("%v?text=%v", rawURL, "dummy"),
 		},
 		{
@@ -124,7 +138,11 @@ func TestAddQueryParams(t *testing.T) {
 				Text   string `url:"text,omitempty"`
 				Number int    `url:"number,omitempty"`
 				Flag   bool   `url:"flag,omitempty"`
-			}{"dummy", 5, true},
+			}{
+				"dummy",
+				5,
+				true,
+			},
 			expected: fmt.Sprintf("%v?flag=%v&number=%v&text=%v", rawURL, true, 5, "dummy"),
 		},
 	}
@@ -132,7 +150,7 @@ func TestAddQueryParams(t *testing.T) {
 	for _, tc := range testCases {
 		actual, err := addQueryParams(rawURL, tc.params)
 		if err != nil {
-			t.Errorf("addQueryParams(%v, %v): unexpected error: %v",
+			t.Errorf("unexpected error in addQueryParams(%v, %v): %v",
 				rawURL, tc.params, err)
 		}
 		if actual != tc.expected {

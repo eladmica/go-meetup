@@ -20,8 +20,8 @@ func TestFindTopics(t *testing.T) {
 	}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, fmt.Sprintf("%v?query=%v", testEndpoint, query))
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, fmt.Sprintf("%v?query=%v", testEndpoint, query))
 		fmt.Fprint(rw, string(mock))
 	})
 
@@ -67,8 +67,8 @@ func TestFindTopicCategories(t *testing.T) {
 	}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, fmt.Sprintf("%v?lat=%v&lon=%v", testEndpoint, testParams.Lat, testParams.Lon))
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, fmt.Sprintf("%v?lat=%v&lon=%v", testEndpoint, testParams.Lat, testParams.Lon))
 		fmt.Fprint(rw, "[]")
 	})
 
@@ -86,8 +86,8 @@ func TestGetRecommendedGroupTopics(t *testing.T) {
 	testParams := &GetRecommendedGroupTopicsParams{Page: 20}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, fmt.Sprintf("%v?page=%v", testEndpoint, testParams.Page))
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, fmt.Sprintf("%v?page=%v", testEndpoint, testParams.Page))
 		fmt.Fprint(rw, "[]")
 	})
 

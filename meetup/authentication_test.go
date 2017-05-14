@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestAuthenticateRequest(t *testing.T) {
+func TestAuthenticateRequestUsingKeyAuth(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -22,6 +22,6 @@ func TestAuthenticateRequest(t *testing.T) {
 	}
 
 	if actual := req.URL.Query().Get("key"); actual != key {
-		t.Errorf("Key expected: %v, actual: %v", key, actual)
+		t.Errorf("expected key: %v, actual: %v", key, actual)
 	}
 }

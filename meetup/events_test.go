@@ -19,8 +19,8 @@ func TestGetEvent(t *testing.T) {
 	}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, string(mock))
 	})
 
@@ -33,13 +33,13 @@ func TestGetEvent(t *testing.T) {
 		Created:       1476304026000,
 		ID:            "234811452",
 		Name:          "May 2017 NY Tech Meetup and Afterparty",
-		RsvpLimit:     400,
+		RSVPLimit:     400,
 		Status:        "upcoming",
 		Time:          1494370800000,
 		Updated:       1492530555000,
 		UTCOffset:     -14400000,
 		WaitlistCount: 0,
-		YesRsvpCount:  120,
+		YesRSVPCount:  120,
 		Link:          "https://www.meetup.com/ny-tech/events/234811452/",
 		Description:   "Join us for NYC's most famous and longest running monthly tech event!",
 		Visibility:    "public",
@@ -92,8 +92,8 @@ func TestGetEvents(t *testing.T) {
 	}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, fmt.Sprintf("%v?desc=%v&page=%v", testEndpoint, testParams.Desc, testParams.Page))
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, fmt.Sprintf("%v?desc=%v&page=%v", testEndpoint, testParams.Desc, testParams.Page))
 		fmt.Fprint(rw, "[]")
 	})
 
@@ -110,12 +110,12 @@ func TestFindEvents(t *testing.T) {
 	testEndpoint := "/find/events"
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, "[]")
 	})
 
-	_, err := testClient.FindEvents()
+	_, err := testClient.FindEvents(nil)
 	if err != nil {
 		t.Errorf("unexpected error in FindEvents: %v", err)
 	}
@@ -128,8 +128,8 @@ func TestGetRecommendedEventsEvents(t *testing.T) {
 	testEndpoint := "/recommended/events"
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, "[]")
 	})
 

@@ -19,8 +19,8 @@ func TestGetGroup(t *testing.T) {
 	}
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, string(mock))
 	})
 
@@ -95,8 +95,8 @@ func TestGetSimilarGroups(t *testing.T) {
 	testEndpoint := "/:urlname/similar_groups"
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, "[]")
 	})
 
@@ -113,12 +113,12 @@ func TestFindGroups(t *testing.T) {
 	testEndpoint := "/find/groups"
 
 	testMux.HandleFunc(testEndpoint, func(rw http.ResponseWriter, req *http.Request) {
-		testReqMethod(t, req, "GET")
-		testReqURL(t, req, testEndpoint)
+		testRequestMethod(t, req, "GET")
+		testRequestURL(t, req, testEndpoint)
 		fmt.Fprint(rw, "[]")
 	})
 
-	_, err := testClient.FindGroups()
+	_, err := testClient.FindGroups(nil)
 	if err != nil {
 		t.Errorf("unexpected error in FindGroups: %v", err)
 	}
