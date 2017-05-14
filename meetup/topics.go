@@ -2,6 +2,7 @@ package meetup
 
 import "fmt"
 
+// Topic represents a Meetup topic
 type Topic struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
@@ -12,6 +13,7 @@ type Topic struct {
 	Lang        string `json:"lang"`
 }
 
+// TopicCategory represents a high level topic category
 type TopicCategory struct {
 	ID        int    `json:"id"`
 	ShortName string `json:"shortname"`
@@ -28,6 +30,8 @@ type TopicCategory struct {
 	CategoryIds []int `json:"category_ids"`
 }
 
+// FindTopics gets a listing of topics based on the query search parameter
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/events/:id/#get
 func (c *Client) FindTopics(query string) ([]*Topic, error) {
 	url := fmt.Sprintf("%v/find/topics?query=%v", c.BaseURL, query)
 
@@ -45,6 +49,8 @@ func (c *Client) FindTopics(query string) ([]*Topic, error) {
 	return topics, nil
 }
 
+// FindTopicCategoriesParams represents optional parameters for FindTopicCategories
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/topic_categories/
 type FindTopicCategoriesParams struct {
 	Fields string  `url:"fields,omitempty"`
 	Lat    float64 `url:"lat,omitempty"`
@@ -52,6 +58,8 @@ type FindTopicCategoriesParams struct {
 	Radius int     `url:"radius,omitempty"`
 }
 
+//  FindTopicCategories gets a listing of high level topic categories
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/topic_categories/
 func (c *Client) FindTopicCategories(params *FindTopicCategoriesParams) ([]*TopicCategory, error) {
 	url := fmt.Sprintf("%v/find/topic_categories", c.BaseURL)
 
@@ -74,6 +82,8 @@ func (c *Client) FindTopicCategories(params *FindTopicCategoriesParams) ([]*Topi
 	return topicCategories, nil
 }
 
+// GetRecommendedGroupTopicsParams represents optional parameters for GetRecommendedGroupTopics
+// Meetup docs: https://www.meetup.com/meetup_api/docs/recommended/group_topics/
 type GetRecommendedGroupTopicsParams struct {
 	ExcludeTopics string `url:"exclude_topics,omitempty"`
 	Lang          string `url:"lang,omitempty"`
@@ -82,6 +92,8 @@ type GetRecommendedGroupTopicsParams struct {
 	Text          string `url:"text,omitempty"`
 }
 
+// GetRecommendedGroupTopics gets a listing of recommended group topics based on a text search or other topics
+// Meetup docs: https://www.meetup.com/meetup_api/docs/recommended/group_topics/
 func (c *Client) GetRecommendedGroupTopics(params *GetRecommendedGroupTopicsParams) ([]*Topic, error) {
 	url := fmt.Sprintf("%v/recommended/group_topics", c.BaseURL)
 

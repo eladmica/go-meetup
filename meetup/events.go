@@ -2,6 +2,7 @@ package meetup
 
 import "fmt"
 
+// Event represents a Meetup event
 type Event struct {
 	Created       int         `json:"created"`
 	Duration      int         `json:"duration"`
@@ -12,8 +13,8 @@ type Event struct {
 	Updated       int         `json:"updated"`
 	UTCOffset     int         `json:"utc_offset"`
 	WaitlistCount int         `json:"waitlist_count"`
-	RsvpLimit     int         `json:"rsvp_limit"`
-	YesRsvpCount  int         `json:"yes_rsvp_count"`
+	RSVPLimit     int         `json:"rsvp_limit"`
+	YesRSVPCount  int         `json:"yes_rsvp_count"`
 	Link          string      `json:"link"`
 	Description   string      `json:"description"`
 	Visibility    string      `json:"visibility"`
@@ -22,6 +23,7 @@ type Event struct {
 	Fee           *EventFee   `json:"fee"`
 }
 
+// EventVenue represents an event venue
 type EventVenue struct {
 	ID                   int     `json:"id"`
 	Name                 string  `json:"name"`
@@ -38,6 +40,7 @@ type EventVenue struct {
 	State                string  `json:"state"`
 }
 
+// EventGroup represents an event hosting group
 type EventGroup struct {
 	Created  int     `json:"created"`
 	Name     string  `json:"name"`
@@ -49,6 +52,7 @@ type EventGroup struct {
 	Who      string  `json:"who"`
 }
 
+// EventFee represents an event fee
 type EventFee struct {
 	Accepts     string  `json:"accepts"`
 	Amount      float64 `json:"amount"`
@@ -58,8 +62,10 @@ type EventFee struct {
 	Required    bool    `json:"required"`
 }
 
-func (c *Client) GetEvent(urlName, eventID string) (*Event, error) {
-	url := fmt.Sprintf("%v/%v/events/%v", c.BaseURL, urlName, eventID)
+// GetEvents gets a single event using a group's url name and an event's id.
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/events/:id/#get
+func (c *Client) GetEvent(groupURLName, eventID string) (*Event, error) {
+	url := fmt.Sprintf("%v/%v/events/%v", c.BaseURL, groupURLName, eventID)
 
 	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
@@ -75,6 +81,8 @@ func (c *Client) GetEvent(urlName, eventID string) (*Event, error) {
 	return event, nil
 }
 
+// GetEventsParams represents optional parameters for GetEvents
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/events/#list
 type GetEventsParams struct {
 	Desc   bool   `url:"desc,omitempty"`
 	Fields string `url:"fields,omitempty"`
@@ -83,8 +91,10 @@ type GetEventsParams struct {
 	Scroll string `url:"scroll,omitempty"`
 }
 
-func (c *Client) GetEvents(urlName string, params *GetEventsParams) ([]*Event, error) {
-	url := fmt.Sprintf("%v/%v/events", c.BaseURL, urlName)
+// GetEvents gets a listing of all events under the given group's url name
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/events/#list
+func (c *Client) GetEvents(groupURLName string, params *GetEventsParams) ([]*Event, error) {
+	url := fmt.Sprintf("%v/%v/events", c.BaseURL, groupURLName)
 
 	url, err := addQueryParams(url, params)
 	if err != nil {
@@ -105,8 +115,25 @@ func (c *Client) GetEvents(urlName string, params *GetEventsParams) ([]*Event, e
 	return events, nil
 }
 
-func (c *Client) FindEvents() ([]*Event, error) {
+// FindEventsParams represents optional parameters for FindEvents
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/events/
+type FindEventsParams struct {
+	Lat    float64 `url:"lat,omitempty"`
+	Lon    float64 `url:"lon,omitempty"`
+	Radius int     `url:"radius,omitempty"`
+	Text   string  `url:"text,omitempty"`
+	Fields string  `url:"fields,omitempty"`
+}
+
+// FindEvents gets a listing of upcoming events based on location
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/events/
+func (c *Client) FindEvents(params *FindEventsParams) ([]*Event, error) {
 	url := fmt.Sprintf("%v/find/events", c.BaseURL)
+
+	url, err := addQueryParams(url, params)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
@@ -122,6 +149,8 @@ func (c *Client) FindEvents() ([]*Event, error) {
 	return events, nil
 }
 
+// GetRecommendedEventsParams represents optional parameters for GetRecommendedEvents
+// Meetup docs: https://www.meetup.com/meetup_api/docs/recommended/events/
 type GetRecommendedEventsParams struct {
 	Lat           float64 `json:"lat,omitempty"`
 	Lon           float64 `json:"lon,omitempty"`
@@ -131,6 +160,8 @@ type GetRecommendedEventsParams struct {
 	TopicCategory int     `json:"topic_category,omitempty"`
 }
 
+// GetRecommendedEvents gets a listing of upcoming recommended events
+// Meetup docs: https://www.meetup.com/meetup_api/docs/recommended/events/
 func (c *Client) GetRecommendedEvents(params *GetRecommendedEventsParams) ([]*Event, error) {
 	url := fmt.Sprintf("%v/recommended/events", c.BaseURL)
 

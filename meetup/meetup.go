@@ -21,6 +21,7 @@ const (
 	headerRateRemaining = "X-Ratelimit-Remaining"
 	headerRateReset     = "X-RateLimit-Reset"
 	headerContentType   = "Content-Type"
+	headerAccept        = "Accept"
 
 	mediaType = "application/json"
 )
@@ -30,10 +31,10 @@ type Client struct {
 	// HTTP client used to communicate with the API.
 	client *http.Client
 
-	// Base URL for the meetup api. Have it as a field to allow mock testing
+	// Base URL for the API
 	BaseURL string
 
-	// Authentication can be used to authenticate requests
+	// Authentication used to authenticate HTTP requests
 	Authentication Authenticator
 
 	// Rate limits for the client
@@ -42,7 +43,8 @@ type Client struct {
 	sync.Mutex
 }
 
-// NewClient returns a new Meetup API client
+// NewClient returns a new Meetup API client with the given httpClient.
+// if httpClient is nil, a default http client will be used.
 func NewClient(httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -55,7 +57,7 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 }
 
-// Create an API request
+// NewRequest creates a new request to be sent to the API
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
 	var buf io.ReadWriter
 	if body != nil {
@@ -75,6 +77,8 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 		req.Header.Set(headerContentType, mediaType)
 	}
 
+	req.Header.Set(headerAccept, mediaType)
+
 	if c.Authentication != nil {
 		err := c.Authentication.AuthenticateRequest(req)
 		if err != nil {
@@ -85,7 +89,8 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	return req, nil
 }
 
-// Executes a request to the API and stores the JSON decoded response in v
+// Do sends a prepared request to the API and stores the response body in the value
+// pointed to by v. If the API responded with an error, it will parse and return it.
 func (c *Client) Do(req *http.Request, v interface{}) error {
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -111,7 +116,8 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 	return nil
 }
 
-// Rate limits by the Meetup API
+// Rate represents the rate limits for the client as determined by the API response.
+// Meetup docs: https://www.meetup.com/meetup_api/#limits
 type Rate struct {
 	// Maximum number of requests that can be made in a window of time
 	Limit int
@@ -123,7 +129,7 @@ type Rate struct {
 	Reset int
 }
 
-// parse rate limits from the Meetup API response header
+// parseRate parses the rate limits from the response header
 func parseRate(header http.Header) *Rate {
 	var rate Rate
 
@@ -142,7 +148,7 @@ func parseRate(header http.Header) *Rate {
 	return &rate
 }
 
-// Error reports a general error from the API
+// ErrorResponse represents a general error returned by the API
 type ErrorResponse struct {
 	Response *http.Response
 	Errors   []struct {
@@ -152,6 +158,7 @@ type ErrorResponse struct {
 	} `json:"errors"`
 }
 
+// Error prints a user-readable message from the ErrorResponse
 func (e *ErrorResponse) Error() string {
 	message := fmt.Sprintf("%v: %v %v", e.Response.Status, e.Response.Request.Method, e.Response.Request.URL)
 	for _, apiErr := range e.Errors {
@@ -161,7 +168,8 @@ func (e *ErrorResponse) Error() string {
 	return strings.TrimSuffix(message, ",")
 }
 
-// Checks whether the API call resulted in an error
+// checkResponse checks whether the API responded with an error
+// If there was an error, it will parse and return it.
 func checkResponse(r *http.Response) error {
 	if r.StatusCode >= 200 && r.StatusCode <= 299 {
 		return nil
@@ -179,9 +187,10 @@ func checkResponse(r *http.Response) error {
 	return errorResponse
 }
 
-// params must be a struct / pointer to a struct with possible types: pointers, ints, uints, floats, bool, string
-// Encodes params as URL query parameters and returns the resulting url.
-// params fields should contain "url" tags, or else would be ignored.
+// addQueryParams encodes the given param struct as url query parameters
+// and appends them to the given rawURL
+// params must be a struct / pointer to a struct with possible field types: ints, uints, floats, bools, and strings
+// params fields should contain a "url" tag, or else would be ignored.
 func addQueryParams(rawURL string, params interface{}) (string, error) {
 	if params == nil {
 		return rawURL, nil
@@ -233,7 +242,7 @@ func addQueryParams(rawURL string, params interface{}) (string, error) {
 	return rawURL, nil
 }
 
-// Returns whether or not val is the empty value of its type
+// isEmpty checks whether a given val is the empty value of its type
 func isEmpty(val reflect.Value) bool {
 	switch val.Kind() {
 	case reflect.Ptr, reflect.Interface:

@@ -1,9 +1,8 @@
 package meetup
 
-import (
-	"fmt"
-)
+import "fmt"
 
+// Group represents a Meetup group
 type Group struct {
 	ID                   int             `json:"id"`
 	Name                 string          `json:"name"`
@@ -30,6 +29,7 @@ type Group struct {
 	Category             *GroupCategory  `json:"category"`
 }
 
+// GroupNextEvent represents the group's next event
 type GroupNextEvent struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
@@ -38,6 +38,7 @@ type GroupNextEvent struct {
 	UTCOffset    int    `json:"utc_offset"`
 }
 
+// GroupOrganizer represents the group's organizer
 type GroupOrganizer struct {
 	ID    int    `json:"id"`
 	Name  string `json:"name"`
@@ -52,6 +53,7 @@ type GroupOrganizer struct {
 	} `json:"photo"`
 }
 
+// GroupPhoto represents the group's photo
 type GroupPhoto struct {
 	ID          int    `json:"id"`
 	HighResLink string `json:"highres_link"`
@@ -61,6 +63,7 @@ type GroupPhoto struct {
 	BaseURL     string `json:"base_url"`
 }
 
+// GroupKeyPhoto represents the group's primary photo
 type GroupKeyPhoto struct {
 	ID          int    `json:"id"`
 	HighResLink string `json:"highres_link"`
@@ -70,6 +73,7 @@ type GroupKeyPhoto struct {
 	BaseURL     string `json:"base_url"`
 }
 
+// GroupCategory represents the group's category
 type GroupCategory struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
@@ -77,8 +81,10 @@ type GroupCategory struct {
 	SortName  string `json:"sort_name"`
 }
 
-func (c *Client) GetGroup(urlName string) (*Group, error) {
-	url := fmt.Sprintf("%v/%v", c.BaseURL, urlName)
+// GetGroup gets a group's information using the group's url name
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/#get
+func (c *Client) GetGroup(groupURLName string) (*Group, error) {
+	url := fmt.Sprintf("%v/%v", c.BaseURL, groupURLName)
 
 	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
@@ -94,8 +100,10 @@ func (c *Client) GetGroup(urlName string) (*Group, error) {
 	return group, nil
 }
 
-func (c *Client) GetSimilarGroups(urlName string) ([]*Group, error) {
-	url := fmt.Sprintf("%v/%v/similar_groups", c.BaseURL, urlName)
+// GetSimilarGroups gets a listing of similar groups based on a given group's url name
+// Meetup docs: https://www.meetup.com/meetup_api/docs/:urlname/similar_groups/
+func (c *Client) GetSimilarGroups(groupURLName string) ([]*Group, error) {
+	url := fmt.Sprintf("%v/%v/similar_groups", c.BaseURL, groupURLName)
 
 	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
@@ -111,8 +119,35 @@ func (c *Client) GetSimilarGroups(urlName string) ([]*Group, error) {
 	return groups, nil
 }
 
-func (c *Client) FindGroups() ([]*Group, error) {
+// FindGroupsParams represents optional parameters for FindGroups
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/groups/
+type FindGroupsParams struct {
+	Order               string  `url:"order,omitempty"`
+	Category            string  `url:"category,omitempty"`
+	Country             string  `url:"country,omitempty"`
+	FallbackSuggestions bool    `url:"fallback_suggestions,omitempty"`
+	Fields              string  `url:"fields,omitempty"`
+	Filter              string  `url:"filter,omitempty"`
+	Lat                 float64 `url:"lat,omitempty"`
+	Lon                 float64 `url:"lon,omitempty"`
+	Location            string  `url:"location,omitempty"`
+	Radius              int     `url:"radius,omitempty"`
+	SelfGroups          string  `url:"self_groups,omitempty"`
+	Text                string  `url:"text,omitempty"`
+	TopicId             string  `url:"topic_id,omitempty"`
+	UpcomingEvents      bool    `url:"upcoming_events,omitempty"`
+	ZIP                 string  `url:"zip,omitempty"`
+}
+
+// FindGroups gets a listing of group based on the search parameters
+// Meetup docs: https://www.meetup.com/meetup_api/docs/find/groups/
+func (c *Client) FindGroups(params *FindGroupsParams) ([]*Group, error) {
 	url := fmt.Sprintf("%v/find/groups", c.BaseURL)
+
+	url, err := addQueryParams(url, params)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
